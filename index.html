@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Words Voice App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .group-title {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .group-2 { background-color: #2ecc71; }
+        .group-3 { background-color: #9b59b6; }
+        
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .word-card {
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+        .word-card:active {
+            transform: translateY(0);
+            background-color: #eef7fe;
+        }
+        .word-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .english {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .japanese {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+        .play-btn {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #555;
+            cursor: pointer;
+        }
+        .play-btn:hover {
+            background: #e3eef8;
+        }
+        .buttons {
+            display: flex;
+            gap: 6px;
+        }
+        .week-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #ccd6dd;
+            padding-bottom: 6px;
+            margin-top: 10px;
+        }
+        details.week {
+            margin-top: 40px;
+        }
+        details.week summary {
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .random-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .group-title .random-bar { margin: 6px 0 0; }
+        .random-bar button {
+            border: none;
+            border-radius: 18px;
+            padding: 6px 14px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .random-bar button.main { font-weight: bold; }
+        .random-bar button:disabled { opacity: 0.4; cursor: default; }
+        .random-bar .count { font-size: 0.9rem; }
+        .random-bar .answer {
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: white;
+            color: #2c3e50;
+            border-radius: 6px;
+            padding: 2px 10px;
+        }
+        .random-all {
+            background: #fff8e1;
+            border: 2px solid #f5c542;
+            border-radius: 8px;
+            padding: 8px 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔊 Spelling Practice App</h1>
+
+    <div id="weeks"></div>
+</div>
+
+<script>
+const weeks = [
+  {
+    label: "10月12日の週",
+    group1: [
+        { en: "for", ja: "〜のために" },
+        { en: "on", ja: "〜の上に" },
+        { en: "are", ja: "〜です（複数）" },
+        { en: "as", ja: "〜として・〜のように" },
+        { en: "back", ja: "後ろ・もどって" },
+        { en: "sack", ja: "ふくろ" },
+        { en: "black", ja: "黒い" },
+        { en: "snack", ja: "おやつ" }
+    ],
+    group2: [
+        { en: "very", ja: "とても" },
+        { en: "after", ja: "〜のあとで" },
+        { en: "things", ja: "もの（複数）" },
+        { en: "our", ja: "私たちの" },
+        { en: "just", ja: "ちょうど・ただ" },
+        { en: "girl", ja: "女の子" },
+        { en: "dirt", ja: "土・どろ" },
+        { en: "shirt", ja: "シャツ" },
+        { en: "third", ja: "3番目の" },
+        { en: "thirst", ja: "のどのかわき" },
+        { en: "birth", ja: "誕生" },
+        { en: "yellow", ja: "黄色" },
+        { en: "add", ja: "足す・加える" },
+        { en: "got", ja: "手に入れた" },
+        { en: "life", ja: "生命・生活" },
+        { en: "cycle", ja: "めぐり・自転車に乗る" }
+    ],
+    group3: [
+        { en: "trade", ja: "交換する・貿易" },
+        { en: "start", ja: "始める" },
+        { en: "city", ja: "都市・市" },
+        { en: "earth", ja: "地球" },
+        { en: "hope", ja: "希望・願う" },
+        { en: "stone", ja: "石" },
+        { en: "follow", ja: "ついていく" },
+        { en: "broke", ja: "こわした" },
+        { en: "sign", ja: "標識・サインする" },
+        { en: "tiny", ja: "とても小さい" },
+        { en: "whole", ja: "全体の" },
+        { en: "wave", ja: "波・手をふる" },
+        { en: "current", ja: "流れ・今の" },
+        { en: "electric", ja: "電気の" },
+        { en: "science", ja: "科学・理科" },
+        { en: "round", ja: "丸い" }
+    ]
+  },
+  {
+    label: "10月5日の週",
+    group1: [
+        { en: "than", ja: "〜よりも" },
+        { en: "it", ja: "それ" },
+        { en: "he", ja: "彼" },
+        { en: "was", ja: "〜だった" },
+        { en: "map", ja: "地図" },
+        { en: "cap", ja: "ぼうし" },
+        { en: "nap", ja: "昼寝" },
+        { en: "tap", ja: "軽くたたく" }
+    ],
+    group2: [
+        { en: "live", ja: "住む・生きる" },
+        { en: "me", ja: "私を・私に" },
+        { en: "cool", ja: "すずしい・かっこいい" },
+        { en: "give", ja: "あげる" },
+        { en: "most", ja: "いちばん多く" },
+        { en: "saw", ja: "見た / のこぎり" },
+        { en: "law", ja: "法律" },
+        { en: "raw", ja: "生の" },
+        { en: "far", ja: "遠い" },
+        { en: "straw", ja: "ストロー・わら" },
+        { en: "draw", ja: "（絵を）かく" },
+        { en: "country", ja: "国" },
+        { en: "ocean", ja: "海" },
+        { en: "title", ja: "題名" },
+        { en: "skip", ja: "スキップする・とばす" },
+        { en: "change", ja: "変える・変わる" }
+    ],
+    group3: [
+        { en: "save", ja: "救う・とっておく" },
+        { en: "school", ja: "学校" },
+        { en: "father", ja: "父" },
+        { en: "keep", ja: "持ち続ける・保つ" },
+        { en: "safe", ja: "安全な" },
+        { en: "grade", ja: "学年・成績" },
+        { en: "reached", ja: "届いた・着いた" },
+        { en: "raise", ja: "上げる" },
+        { en: "theme", ja: "テーマ" },
+        { en: "scream", ja: "さけぶ" },
+        { en: "easy", ja: "かんたんな" },
+        { en: "highway", ja: "幹線道路" },
+        { en: "navigate", ja: "道を進む・案内する" },
+        { en: "ocean", ja: "海" },
+        { en: "travel", ja: "旅行する" },
+        { en: "direction", ja: "方向" }
+    ]
+  },
+  {
+    label: "9月28日の週",
+    group1: [
+        { en: "pan", ja: "フライパン" },
+        { en: "is", ja: "〜です" },
+        { en: "ran", ja: "走った" },
+        { en: "you", ja: "あなた" },
+        { en: "can", ja: "〜できる / 缶" },
+        { en: "in", ja: "〜の中に" },
+        { en: "man", ja: "男性" },
+        { en: "to", ja: "〜へ" }
+    ],
+    group2: [
+        { en: "wait", ja: "待つ" },
+        { en: "goods", ja: "商品" },
+        { en: "know", ja: "知っている" },
+        { en: "sail", ja: "航海する" },
+        { en: "little", ja: "小さい" },
+        { en: "consumer", ja: "消費者" },
+        { en: "rain", ja: "雨" },
+        { en: "chant", ja: "声を合わせて唱える" },
+        { en: "work", ja: "働く" },
+        { en: "producer", ja: "生産者" },
+        { en: "paid", ja: "支払った" },
+        { en: "place", ja: "場所" },
+        { en: "mail", ja: "郵便物" },
+        { en: "years", ja: "年" },
+        { en: "services", ja: "サービス" },
+        { en: "paint", ja: "絵の具・塗る" }
+    ],
+    group3: [
+        { en: "formula", ja: "公式" },
+        { en: "pond", ja: "池" },
+        { en: "between", ja: "〜の間に" },
+        { en: "calculate", ja: "計算する" },
+        { en: "slip", ja: "滑る" },
+        { en: "yard", ja: "ヤード" },
+        { en: "front", ja: "正面" },
+        { en: "own", ja: "自分自身の" },
+        { en: "plant", ja: "植物" },
+        { en: "area", ja: "面積" },
+        { en: "thump", ja: "ドスンと叩く" },
+        { en: "base", ja: "土台・底辺" },
+        { en: "country", ja: "国" },
+        { en: "width", ja: "幅" },
+        { en: "lunch", ja: "昼食" },
+        { en: "inches", ja: "インチ" }
+    ]
+  }
+];
+
+// 音声は build-audio.py で事前に作った audio/<word>.mp3（ゆっくり版は .slow.mp3）
+let currentAudio = null;
+
+function stopAll() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    window.speechSynthesis.cancel();
+}
+
+// 音声ファイルが無いとき（単語を足して未生成など）だけ、ブラウザの読み上げで代用する
+function speakWithBrowser(text, slow) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = slow ? 0.6 : 0.9;
+    const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+    const best = voices.find(v => /Natural|Enhanced|Premium|Google/.test(v.name)) || voices.find(v => v.lang === 'en-US');
+    if (best) utterance.voice = best;
+    window.speechSynthesis.speak(utterance);
+}
+
+function speak(text, slow = false) {
+    stopAll();
+    const audio = new Audio(`audio/${encodeURIComponent(text)}${slow ? '.slow' : ''}.mp3`);
+    currentAudio = audio;
+    let fellBack = false;
+    const fallback = () => {
+        if (fellBack || currentAudio !== audio) return;
+        fellBack = true;
+        speakWithBrowser(text, slow);
+    };
+    audio.addEventListener('error', fallback);
+    audio.play().catch(err => {
+        if (err.name !== 'AbortError') fallback();
+    });
+}
+
+function renderGroup(container, words) {
+    words.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'word-card';
+        card.onclick = () => speak(item.en);
+
+        card.innerHTML = `
+            <div class="word-info">
+                <span class="english">${item.en}</span>
+                <span class="japanese">${item.ja}</span>
+            </div>
+            <div class="buttons">
+                <button class="play-btn" title="ふつうの速さ" aria-label="${item.en} を再生">🔊</button>
+                <button class="play-btn slow-btn" title="ゆっくり" aria-label="${item.en} をゆっくり再生">🐢</button>
+            </div>
+        `;
+        card.querySelector('.slow-btn').onclick = e => {
+            e.stopPropagation();
+            speak(item.en, true);
+        };
+        container.appendChild(card);
+    });
+}
+
+// ランダム再生: 山札を切って1語ずつ読む。全部読んだら切り直す。答えは押すまで見せない
+function makeRandomBar(words, label) {
+    const uniq = [...new Map(words.map(w => [w.en, w])).values()];
+    const bar = document.createElement('div');
+    bar.className = 'random-bar';
+    bar.innerHTML = `
+        <button class="main">🎲 ${label}</button>
+        <button class="again" disabled>🔁 もう一度</button>
+        <button class="slow" disabled>🐢 ゆっくり</button>
+        <button class="reveal" disabled>👀 答え</button>
+        <button class="restart" disabled>⏮ 初めから</button>
+        <span class="count"></span>
+        <span class="answer" hidden></span>
+    `;
+    const [main, again, slow, reveal, restart] = bar.querySelectorAll('button');
+    const count = bar.querySelector('.count');
+    const answer = bar.querySelector('.answer');
+    let deck = [], pos = 0, current = null;
+    const shuffle = () => {
+        deck = uniq.slice();
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        pos = 0;
+    };
+    main.onclick = () => {
+        if (pos >= deck.length) shuffle();
+        current = deck[pos++];
+        speak(current.en);
+        again.disabled = slow.disabled = reveal.disabled = restart.disabled = false;
+        answer.hidden = true;
+        count.textContent = `${pos} / ${deck.length}`;
+        main.textContent = pos >= deck.length ? '🎲 もう一周' : '次へ ▶';
+    };
+    // 初めから: 切り直して1語目を読む
+    restart.onclick = () => { shuffle(); main.onclick(); };
+    again.onclick = () => speak(current.en);
+    slow.onclick = () => speak(current.en, true);
+    reveal.onclick = () => {
+        answer.textContent = `${current.en}（${current.ja}）`;
+        answer.hidden = false;
+    };
+    return bar;
+}
+
+// いちばん上が今週。前の週はたたんで下に置く
+const GROUPS = [['group1', 'Group 1', ''], ['group2', 'Group 2', 'group-2'], ['group3', 'Group 3', 'group-3']];
+const root = document.getElementById('weeks');
+weeks.forEach((week, i) => {
+    let box;
+    if (i === 0) {
+        box = root;
+        const h = document.createElement('h2');
+        h.className = 'week-title';
+        h.textContent = week.label;
+        box.appendChild(h);
+    } else {
+        box = document.createElement('details');
+        box.className = 'week';
+        const summary = document.createElement('summary');
+        summary.textContent = week.label;
+        box.appendChild(summary);
+        root.appendChild(box);
+    }
+    const all = makeRandomBar(GROUPS.flatMap(([key]) => week[key]), '全グループからランダム');
+    all.classList.add('random-all');
+    box.appendChild(all);
+    GROUPS.forEach(([key, title, cls]) => {
+        const t = document.createElement('div');
+        t.className = ('group-title ' + cls).trim();
+        t.textContent = title;
+        t.appendChild(makeRandomBar(week[key], 'ランダム'));
+        const grid = document.createElement('div');
+        grid.className = 'word-grid';
+        box.appendChild(t);
+        box.appendChild(grid);
+        renderGroup(grid, week[key]);
+    });
+});
+</script>
+
+</body>
+</html>
