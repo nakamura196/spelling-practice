@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Spelling">
     <title>Spelling Words Voice App</title>
     <style>
         * {
@@ -146,20 +148,397 @@
             border-radius: 8px;
             padding: 8px 15px;
         }
+        /* ---- ひとりで練習（子ども向け） ---- */
+        body {
+            background: linear-gradient(160deg, #fff3c4 0%, #ffd6e7 50%, #c9ecff 100%) fixed;
+            min-height: 100vh;
+        }
+        .trainer, .title, .trainer button, .trainer select {
+            font-family: 'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+        }
+        .title { font-size: 2.6rem; margin: 6px 0 16px; letter-spacing: 0.04em; }
+        .title span { display: inline-block; animation: hop 2.4s infinite; }
+        .title span:nth-child(8n+1) { color: #ff6b6b; animation-delay: 0s; }
+        .title span:nth-child(8n+2) { color: #ffa94d; animation-delay: .1s; }
+        .title span:nth-child(8n+3) { color: #fcc419; animation-delay: .2s; }
+        .title span:nth-child(8n+4) { color: #51cf66; animation-delay: .3s; }
+        .title span:nth-child(8n+5) { color: #339af0; animation-delay: .4s; }
+        .title span:nth-child(8n+6) { color: #845ef7; animation-delay: .5s; }
+        .title span:nth-child(8n+7) { color: #f06595; animation-delay: .6s; }
+        .title span:nth-child(8n+8) { color: #20c997; animation-delay: .7s; }
+        @keyframes hop { 0%, 80%, 100% { transform: translateY(0); } 90% { transform: translateY(-8px); } }
+        .trainer {
+            position: relative;
+            background: white; border-radius: 28px; padding: 24px;
+            box-shadow: 0 8px 0 #f2c9d9, 0 10px 24px rgba(0,0,0,0.08);
+            max-width: 660px; margin: 0 auto 30px; font-size: 1.25rem; color: #3d3d5c;
+        }
+        .buddy { display: flex; align-items: center; gap: 12px; font-size: 3.4rem; margin-bottom: 8px; }
+        .bubble {
+            position: relative; font-size: 1.15rem; font-weight: bold; background: #fff4d6;
+            border-radius: 18px; padding: 10px 16px; line-height: 1.5;
+        }
+        .bubble::before {
+            content: ''; position: absolute; left: -10px; top: 50%; margin-top: -8px;
+            border: 8px solid transparent; border-right-color: #fff4d6; border-left: 0;
+        }
+        .t-label { display: block; font-weight: bold; margin: 16px 0 8px; }
+        .t-label select {
+            display: block; width: 100%; margin-top: 8px; font-size: 1.25rem; padding: 12px;
+            border-radius: 16px; border: 3px solid #ffd43b; background: #fffbe6; color: #3d3d5c;
+            -webkit-appearance: none; appearance: none;
+        }
+        .picks { display: flex; flex-wrap: wrap; gap: 12px; }
+        .picks.center { justify-content: center; margin: 10px 0; }
+        .pick {
+            flex: 1 1 140px; min-height: 68px; font-size: 1.3rem; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 20px; background: #f1f3f5; color: #3d3d5c;
+            box-shadow: 0 5px 0 #d0d5da; transition: transform .1s;
+        }
+        .pick:active, .big-btn:active, .round-btn:active { transform: translateY(4px); box-shadow: none; }
+        .pick.on { background: #74c0fc; color: white; box-shadow: 0 5px 0 #339af0; }
+        .pick.group-2.on { background: #69db7c; box-shadow: 0 5px 0 #37b24d; }
+        .pick.group-3.on { background: #b197fc; box-shadow: 0 5px 0 #7950f2; }
+        .pick.mark { min-height: 90px; font-size: 1.6rem; }
+        .pick.mark.ok { background: #d3f9d8; box-shadow: 0 5px 0 #69db7c; color: #2b8a3e; }
+        .pick.mark.ng { background: #ffe3e3; box-shadow: 0 5px 0 #ff8787; color: #c92a2a; }
+        .big-btn {
+            display: block; width: 100%; min-height: 72px; margin-top: 20px; cursor: pointer;
+            font-size: 1.45rem; font-weight: bold; border: none; border-radius: 22px; color: white;
+            background: #ff922b; box-shadow: 0 6px 0 #e8590c; transition: transform .1s;
+        }
+        .big-btn.go { background: #51cf66; box-shadow: 0 6px 0 #2f9e44; }
+        .big-btn.look { background: #4dabf7; box-shadow: 0 6px 0 #1c7ed6; }
+        .big-btn.sub { background: #f1f3f5; color: #3d3d5c; box-shadow: 0 5px 0 #d0d5da; font-size: 1.2rem; min-height: 60px; }
+        .big-btn:disabled { background: #dee2e6; box-shadow: 0 6px 0 #ced4da; color: #868e96; }
+        .small-btn {
+            border: none; border-radius: 14px; background: #f1f3f5; padding: 10px 16px;
+            font-size: 1.05rem; cursor: pointer; color: #3d3d5c;
+        }
+        .small-btn.hint { background: #fff4d6; }
+        .chip { background: #e7f5ff; color: #1c7ed6; font-weight: bold; border-radius: 14px; padding: 6px 14px; }
+        .t-last { text-align: center; color: #868e96; margin-top: 14px; font-size: 1.05rem; }
+        .t-top { display: flex; justify-content: space-between; align-items: center; }
+        .stars { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 14px 0 10px; font-size: 1.5rem; }
+        .stars span { opacity: .25; filter: grayscale(1); transition: all .3s; }
+        .stars span.now { opacity: 1; filter: none; animation: pulse 1s infinite; }
+        .stars span.ok { opacity: 1; filter: none; }
+        .stars span.ng { opacity: 1; filter: none; }
+        @keyframes pulse { 50% { transform: scale(1.3); } }
+        .listen { display: flex; justify-content: center; gap: 22px; margin: 10px 0; }
+        .round-btn {
+            width: 120px; height: 120px; border-radius: 50%; border: none; font-size: 3.4rem; cursor: pointer;
+            background: #ffe066; box-shadow: 0 7px 0 #f08c00; animation: wiggle 3s infinite;
+        }
+        .round-btn.slow { width: 96px; height: 96px; font-size: 2.6rem; align-self: center; background: #b2f2bb; box-shadow: 0 6px 0 #40c057; animation: none; }
+        @keyframes wiggle { 0%, 90%, 100% { transform: rotate(0); } 93% { transform: rotate(-8deg); } 97% { transform: rotate(8deg); } }
+        .hint-row { text-align: center; margin-top: 14px; }
+        .t-hint { margin-top: 10px; font-size: 1.3rem; color: #e8590c; font-weight: bold; }
+        .word {
+            text-align: center; font-size: 3.6rem; font-weight: bold; color: #1c7ed6; margin: 14px 0 4px;
+            font-family: 'Avenir Next', 'Arial Rounded MT Bold', sans-serif; letter-spacing: 0.12em;
+            word-break: break-all; animation: pop .35s;
+        }
+        .ja { text-align: center; color: #868e96; font-size: 1.2rem; margin-bottom: 10px; }
+        #t-answer, #t-fix { text-align: center; }
+        .q { font-weight: bold; margin: 20px 0 6px; }
+        @keyframes pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .cheer {
+            position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%);
+            font-size: 2.4rem; font-weight: bold; color: #f76707; background: white; white-space: nowrap;
+            border-radius: 24px; padding: 14px 26px; box-shadow: 0 6px 20px rgba(0,0,0,.15);
+            pointer-events: none; animation: cheer 1s forwards;
+        }
+        @keyframes cheer { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -90%); } }
+        .medal { font-size: 6rem; text-align: center; animation: pop .5s; }
+        .score { font-size: 2.1rem; font-weight: bold; text-align: center; line-height: 1.4; }
+        .t-missed { text-align: center; margin-top: 14px; color: #c92a2a; font-size: 1.2rem; }
+        #confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+        #confetti span { position: absolute; top: -40px; font-size: 1.8rem; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+        [hidden] { display: none !important; }
+        details.wordlist { background: rgba(255,255,255,.7); border-radius: 16px; padding: 4px 16px; }
+        details.wordlist > summary { cursor: pointer; font-size: 1.1rem; font-weight: bold; color: #3d3d5c; padding: 10px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔊 Spelling Practice App</h1>
+    <h1 class="title"><span>S</span><span>p</span><span>e</span><span>l</span><span>l</span><span>i</span><span>n</span><span>g</span> <small>✏️</small></h1>
 
-    <div id="weeks"></div>
+    <section id="trainer" class="trainer">
+        <div id="t-setup">
+            <div class="buddy">🐻<div class="bubble">いっしょに れんしゅう しよう！</div></div>
+            <label class="t-label">📅 しゅう
+                <select id="t-week"></select>
+            </label>
+            <div class="t-label">👥 グループ</div>
+            <div id="t-groups" class="picks"></div>
+            <button id="t-start" class="big-btn go">スタート ▶</button>
+            <div id="t-last" class="t-last"></div>
+        </div>
+
+        <div id="t-play" hidden>
+            <div class="t-top">
+                <span id="t-progress" class="chip"></span>
+                <button id="t-quit" class="small-btn">やめる</button>
+            </div>
+            <div id="t-stars" class="stars"></div>
+
+            <div id="t-ask">
+                <div class="buddy">🐻<div class="bubble">きいて、かみに かいてね ✏️</div></div>
+                <div class="listen">
+                    <button id="t-play-btn" class="round-btn" aria-label="もう一回 きく">🔊</button>
+                    <button id="t-slow-btn" class="round-btn slow" aria-label="ゆっくり きく">🐢</button>
+                </div>
+                <div class="hint-row">
+                    <button id="t-hint-btn" class="small-btn hint">💡 いみの ヒント</button>
+                    <div id="t-hint" class="t-hint" hidden></div>
+                </div>
+                <button id="t-showans" class="big-btn look">かけたら こたえを 見る 👀</button>
+            </div>
+
+            <div id="t-answer" hidden>
+                <div id="t-word" class="word"></div>
+                <div id="t-ja" class="ja"></div>
+                <button id="t-say" class="small-btn">🔊 もう一回 きく</button>
+                <p class="q">かみの こたえと くらべてみよう</p>
+                <div class="picks center">
+                    <button id="t-ok" class="pick mark ok">⭕ あってた</button>
+                    <button id="t-ng" class="pick mark ng">❌ ちがった</button>
+                </div>
+            </div>
+
+            <div id="t-fix" hidden>
+                <div class="buddy">🐻<div class="bubble">だいじょうぶ！ 見ながら もう一回 かこう</div></div>
+                <div id="t-fixword" class="word"></div>
+                <button id="t-fixed" class="big-btn go">かけた！ つぎへ ▶</button>
+            </div>
+        </div>
+
+        <div id="t-done" hidden>
+            <div id="t-medal" class="medal"></div>
+            <div id="t-score" class="score"></div>
+            <div id="t-missed" class="t-missed"></div>
+            <button id="t-retry-missed" class="big-btn look">まちがえた ことばを もう一回 🔁</button>
+            <button id="t-again" class="big-btn sub">さいしょから もう一回</button>
+            <button id="t-home" class="big-btn sub">おわる</button>
+        </div>
+        <div id="t-cheer" class="cheer" hidden></div>
+    </section>
+
+    <details class="wordlist">
+        <summary>📖 ことばの いちらん（おうちの人と）</summary>
+        <div id="weeks"></div>
+    </details>
 </div>
+<div id="confetti"></div>
 
 <script>
 const weeks = [
   {
+    label: "11月23日の週",
+    start: "2026-11-23",
+    group1: [
+        { en: "when", ja: "いつ" },
+        { en: "your", ja: "あなたの" },
+        { en: "pop", ja: "ポンとはじける" },
+        { en: "said", ja: "言った" },
+        { en: "mop", ja: "モップ" },
+        { en: "top", ja: "てっぺん" },
+        { en: "hop", ja: "ぴょんととぶ" },
+        { en: "drop", ja: "落とす・しずく" }
+    ],
+    group2: [
+        { en: "also", ja: "〜もまた" },
+        { en: "beat", ja: "たたく・打ち負かす" },
+        { en: "seat", ja: "座席" },
+        { en: "three", ja: "3" },
+        { en: "small", ja: "小さい" },
+        { en: "mean", ja: "意味する・いじわるな" },
+        { en: "clean", ja: "きれいな・そうじする" },
+        { en: "peak", ja: "山頂・いちばん高いところ" },
+        { en: "dream", ja: "夢" },
+        { en: "beach", ja: "浜辺" },
+        { en: "team", ja: "チーム" },
+        { en: "length", ja: "長さ" },
+        { en: "weight", ja: "重さ" },
+        { en: "height", ja: "高さ" },
+        { en: "meat", ja: "肉" },
+        { en: "distance", ja: "距離" }
+    ],
+    group3: [
+        { en: "together", ja: "いっしょに" },
+        { en: "tied", ja: "結んだ" },
+        { en: "group", ja: "グループ" },
+        { en: "often", ja: "よく・しばしば" },
+        { en: "table", ja: "テーブル・表" },
+        { en: "space", ja: "空間・宇宙" },
+        { en: "fence", ja: "さく・フェンス" },
+        { en: "price", ja: "値段" },
+        { en: "office", ja: "事務所" },
+        { en: "police", ja: "警察" },
+        { en: "pencil", ja: "えんぴつ" },
+        { en: "civil", ja: "市民の" },
+        { en: "tribal", ja: "部族の" },
+        { en: "buffalo", ja: "バッファロー" },
+        { en: "dance", ja: "ダンス・おどる" },
+        { en: "plains", ja: "平原" }
+    ]
+  },
+  {
+    label: "11月16日の週",
+    start: "2026-11-16",
+    group1: [
+        { en: "what", ja: "何" },
+        { en: "all", ja: "全部" },
+        { en: "were", ja: "〜だった（複数）" },
+        { en: "we", ja: "私たち" },
+        { en: "hot", ja: "熱い・暑い" },
+        { en: "pot", ja: "なべ・つぼ" },
+        { en: "not", ja: "〜ではない" },
+        { en: "lot", ja: "たくさん" }
+    ],
+    group2: [
+        { en: "boy", ja: "男の子" },
+        { en: "soon", ja: "もうすぐ" },
+        { en: "came", ja: "来た" },
+        { en: "want", ja: "ほしい" },
+        { en: "eggs", ja: "たまご（複数）" },
+        { en: "nurse", ja: "看護師" },
+        { en: "curve", ja: "曲線・カーブ" },
+        { en: "turn", ja: "曲がる・順番" },
+        { en: "burn", ja: "燃える" },
+        { en: "curl", ja: "くるっと丸める・巻き毛" },
+        { en: "purse", ja: "さいふ" },
+        { en: "growth", ja: "成長" },
+        { en: "affect", ja: "影響する" },
+        { en: "fish", ja: "魚" },
+        { en: "mammal", ja: "ほ乳類" },
+        { en: "fruit", ja: "果物" }
+    ],
+    group3: [
+        { en: "can't", ja: "〜できない" },
+        { en: "shall", ja: "〜しましょう" },
+        { en: "those", ja: "それらの" },
+        { en: "both", ja: "両方" },
+        { en: "paper", ja: "紙" },
+        { en: "pushed", ja: "押した" },
+        { en: "sharp", ja: "するどい" },
+        { en: "shock", ja: "ショック・おどろき" },
+        { en: "crash", ja: "ぶつかる・衝突" },
+        { en: "showed", ja: "見せた" },
+        { en: "shoes", ja: "くつ" },
+        { en: "shoulder", ja: "肩" },
+        { en: "product", ja: "積（かけ算の答え）・製品" },
+        { en: "quotient", ja: "商（わり算の答え）" },
+        { en: "multiplication", ja: "かけ算" },
+        { en: "division", ja: "わり算" }
+    ]
+  },
+  {
+    label: "11月9日の週",
+    start: "2026-11-09",
+    group1: [
+        { en: "by", ja: "〜のそばに・〜によって" },
+        { en: "words", ja: "ことば（複数）" },
+        { en: "but", ja: "しかし" },
+        { en: "not", ja: "〜ではない" },
+        { en: "sick", ja: "病気の" },
+        { en: "kick", ja: "ける" },
+        { en: "brick", ja: "れんが" },
+        { en: "stick", ja: "棒" }
+    ],
+    group2: [
+        { en: "means", ja: "意味する" },
+        { en: "old", ja: "古い・年をとった" },
+        { en: "any", ja: "いくつかの・どれでも" },
+        { en: "same", ja: "同じ" },
+        { en: "corn", ja: "とうもろこし" },
+        { en: "blue", ja: "青い" },
+        { en: "true", ja: "本当の" },
+        { en: "clue", ja: "手がかり" },
+        { en: "glue", ja: "のり（接着剤）" },
+        { en: "due", ja: "しめきりの" },
+        { en: "argue", ja: "言い争う" },
+        { en: "listen", ja: "聞く" },
+        { en: "song", ja: "歌" },
+        { en: "cause", ja: "原因・引き起こす" },
+        { en: "speak", ja: "話す" },
+        { en: "kind", ja: "親切な・種類" }
+    ],
+    group3: [
+        { en: "cloud", ja: "雲" },
+        { en: "child", ja: "子ども" },
+        { en: "open", ja: "開ける" },
+        { en: "example", ja: "例" },
+        { en: "begin", ja: "始める" },
+        { en: "chance", ja: "機会・チャンス" },
+        { en: "match", ja: "試合・マッチ" },
+        { en: "watch", ja: "見る・うで時計" },
+        { en: "batch", ja: "ひとまとまり" },
+        { en: "steel", ja: "鋼鉄" },
+        { en: "speech", ja: "スピーチ" },
+        { en: "source", ja: "出どころ・みなもと" },
+        { en: "material", ja: "材料" },
+        { en: "ditch", ja: "みぞ" },
+        { en: "women", ja: "女の人たち" },
+        { en: "iron", ja: "鉄・アイロン" }
+    ]
+  },
+  {
+    label: "11月2日の週",
+    start: "2026-11-02",
+    group1: [
+        { en: "from", ja: "〜から" },
+        { en: "or", ja: "または" },
+        { en: "one", ja: "1つ" },
+        { en: "had", ja: "持っていた" },
+        { en: "pin", ja: "ピン・画びょう" },
+        { en: "thin", ja: "うすい・細い" },
+        { en: "spin", ja: "くるくる回る" },
+        { en: "skin", ja: "皮ふ" }
+    ],
+    group2: [
+        { en: "late", ja: "おそい・遅れた" },
+        { en: "before", ja: "〜の前に" },
+        { en: "line", ja: "線・列" },
+        { en: "side", ja: "横・がわ" },
+        { en: "too", ja: "〜も・〜すぎる" },
+        { en: "loud", ja: "（音が）大きい" },
+        { en: "round", ja: "丸い" },
+        { en: "found", ja: "見つけた" },
+        { en: "shout", ja: "さけぶ" },
+        { en: "count", ja: "数える" },
+        { en: "gave", ja: "あげた" },
+        { en: "urban", ja: "都会の" },
+        { en: "suburban", ja: "郊外の" },
+        { en: "rural", ja: "いなかの" },
+        { en: "community", ja: "地域・コミュニティ" },
+        { en: "touch", ja: "さわる" }
+    ],
+    group3: [
+        { en: "along", ja: "〜に沿って" },
+        { en: "bought", ja: "買った" },
+        { en: "close", ja: "閉じる・近い" },
+        { en: "something", ja: "何か" },
+        { en: "seem", ja: "〜のように見える" },
+        { en: "laughed", ja: "笑った" },
+        { en: "lady", ja: "女の人" },
+        { en: "enough", ja: "じゅうぶんな" },
+        { en: "graph", ja: "グラフ" },
+        { en: "paragraph", ja: "段落" },
+        { en: "photograph", ja: "写真" },
+        { en: "history", ja: "歴史" },
+        { en: "village", ja: "村" },
+        { en: "future", ja: "未来" },
+        { en: "hometown", ja: "ふるさと" },
+        { en: "settlers", ja: "移り住んだ人たち・開拓者" }
+    ]
+  },
+  {
     label: "10月12日の週",
+    start: "2026-10-12",
     group1: [
         { en: "for", ja: "〜のために" },
         { en: "on", ja: "〜の上に" },
@@ -209,6 +588,7 @@ const weeks = [
   },
   {
     label: "10月5日の週",
+    start: "2026-10-05",
     group1: [
         { en: "than", ja: "〜よりも" },
         { en: "it", ja: "それ" },
@@ -258,6 +638,7 @@ const weeks = [
   },
   {
     label: "9月28日の週",
+    start: "2026-09-28",
     group1: [
         { en: "pan", ja: "フライパン" },
         { en: "is", ja: "〜です" },
@@ -415,17 +796,186 @@ function makeRandomBar(words, label) {
     return bar;
 }
 
-// いちばん上が今週。前の週はたたんで下に置く
+// ---- 週の選び方: 開始日が今日以前でいちばん新しい週を「今週」にする ----
+function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+const sortedWeeks = weeks.slice().sort((a, b) => b.start.localeCompare(a.start));
+const currentWeek = sortedWeeks.find(w => w.start <= todayStr()) || sortedWeeks[sortedWeeks.length - 1];
+
+// 端末ごとの覚え書き（グループ・前回の結果）。使えなくても動く
+const store = {
+    get(k, def) { try { const v = localStorage.getItem('spelling.' + k); return v === null ? def : JSON.parse(v); } catch { return def; } },
+    set(k, v) { try { localStorage.setItem('spelling.' + k, JSON.stringify(v)); } catch {} }
+};
+
+// ---- ひとりで練習: 聞く → 紙に書く → 答えを見る → 自分で ⭕/❌ → 次へ ----
 const GROUPS = [['group1', 'Group 1', ''], ['group2', 'Group 2', 'group-2'], ['group3', 'Group 3', 'group-3']];
+const CHEERS = ['やったね！🎉', 'すごい！✨', 'ばっちり！👍', 'てんさい！🌟', 'いいね！😊', 'かんぺき！💯'];
+const STAR_ICONS = ['⭐', '🍎', '🐱', '🌈', '🍩', '🚀', '🐶', '🌻'];
+const T = { week: currentWeek.start, group: store.get('group', null), queue: [], idx: 0, missed: [], firstTry: 0, total: 0, round: 1, results: [] };
+const $ = id => document.getElementById(id);
+const weekByStart = s => weeks.find(w => w.start === s);
+const show = (id, on) => { $(id).hidden = !on; };
+
+function renderSetup() {
+    const sel = $('t-week');
+    sel.innerHTML = '';
+    sortedWeeks.forEach(w => {
+        const o = document.createElement('option');
+        o.value = w.start;
+        o.textContent = w.label + (w === currentWeek ? '（こんしゅう）' : '');
+        sel.appendChild(o);
+    });
+    sel.value = T.week;
+    sel.onchange = () => { T.week = sel.value; renderSetup(); };
+    const gbox = $('t-groups');
+    gbox.innerHTML = '';
+    GROUPS.forEach(([key, title, cls]) => {
+        const b = document.createElement('button');
+        b.className = ('pick ' + cls).trim() + (T.group === key ? ' on' : '');
+        b.textContent = title;
+        b.onclick = () => { T.group = key; store.set('group', key); renderSetup(); };
+        gbox.appendChild(b);
+    });
+    const last = T.group && store.get(`last.${T.week}.${T.group}`, null);
+    $('t-last').textContent = last ? `まえの けっか: ${last.total} もん中 ${last.ok} もん せいかい` : '';
+    $('t-start').disabled = !T.group;
+    $('t-start').textContent = T.group ? 'スタート ▶' : 'グループを えらんでね';
+}
+
+function startTest(words) {
+    const deck = [...new Map(words.map(w => [w.en, w])).values()];
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    T.queue = deck; T.idx = 0; T.missed = []; T.results = deck.map(() => '');
+    T.icon = STAR_ICONS[Math.floor(Math.random() * STAR_ICONS.length)];
+    show('t-setup', false); show('t-done', false); show('t-play', true);
+    ask();
+}
+
+function renderStars() {
+    $('t-stars').innerHTML = T.queue.map((_, i) => {
+        const r = T.results[i];
+        const cls = r || (i === T.idx ? 'now' : '');
+        const icon = r === 'ng' ? '🔁' : T.icon;
+        return `<span class="${cls}">${icon}</span>`;
+    }).join('');
+}
+
+function ask() {
+    const w = T.queue[T.idx];
+    $('t-progress').textContent = `${T.idx + 1} / ${T.queue.length}` + (T.round > 1 ? ' 🔁' : '');
+    $('t-hint').textContent = w.ja;
+    show('t-hint', false);
+    show('t-ask', true); show('t-answer', false); show('t-fix', false);
+    renderStars();
+    speak(w.en);
+}
+
+function showAnswer() {
+    const w = T.queue[T.idx];
+    $('t-word').textContent = w.en;
+    $('t-ja').textContent = w.ja;
+    show('t-ask', false); show('t-answer', true);
+}
+
+function cheer(text) {
+    const c = $('t-cheer');
+    c.hidden = true;
+    void c.offsetWidth;   // アニメーションを毎回やり直す
+    c.textContent = text;
+    c.hidden = false;
+    clearTimeout(cheer.timer);
+    cheer.timer = setTimeout(() => { c.hidden = true; }, 1000);
+}
+
+function markOk() {
+    T.results[T.idx] = 'ok';
+    T.firstTry++;
+    cheer(CHEERS[Math.floor(Math.random() * CHEERS.length)]);
+    next();
+}
+
+function markNg() {
+    const w = T.queue[T.idx];
+    T.results[T.idx] = 'ng';
+    T.missed.push(w);
+    renderStars();
+    $('t-fixword').textContent = w.en;
+    show('t-answer', false); show('t-fix', true);
+}
+
+function next() {
+    T.idx++;
+    if (T.idx < T.queue.length) ask(); else finishRound();
+}
+
+function confetti() {
+    const box = $('confetti');
+    const icons = ['🎉', '⭐', '🎊', '✨', '🌟', T.icon];
+    for (let i = 0; i < 40; i++) {
+        const s = document.createElement('span');
+        s.textContent = icons[i % icons.length];
+        s.style.left = Math.random() * 100 + 'vw';
+        s.style.animationDuration = 2 + Math.random() * 2 + 's';
+        s.style.animationDelay = Math.random() * 0.8 + 's';
+        box.appendChild(s);
+        setTimeout(() => s.remove(), 5000);
+    }
+}
+
+function finishRound() {
+    show('t-play', false); show('t-done', true);
+    if (T.round === 1) {
+        T.total = T.queue.length;
+        store.set(`last.${T.week}.${T.group}`, { ok: T.firstTry, total: T.total, at: todayStr() });
+    }
+    const perfect = T.missed.length === 0;
+    if (T.round === 1) {
+        $('t-score').innerHTML = `${T.total} もん中 <span style="color:#f76707">${T.firstTry}</span> もん せいかい！`;
+        $('t-medal').textContent = perfect ? '🏆' : (T.firstTry / T.total >= 0.7 ? '🥈' : '💪');
+    } else {
+        $('t-score').textContent = perfect ? 'ぜんぶ おぼえた！' : `あと ${T.missed.length} こ！`;
+        $('t-medal').textContent = perfect ? '🎉' : '💪';
+    }
+    $('t-missed').innerHTML = T.missed.length ? 'もう一回 れんしゅう: ' + T.missed.map(w => `<b>${w.en}</b>`).join('、 ') : '';
+    show('t-retry-missed', !perfect);
+    if (perfect || T.firstTry / T.total >= 0.7) confetti();
+}
+
+$('t-start').onclick = () => { T.firstTry = 0; T.round = 1; startTest(weekByStart(T.week)[T.group]); };
+$('t-play-btn').onclick = () => speak(T.queue[T.idx].en);
+$('t-slow-btn').onclick = () => speak(T.queue[T.idx].en, true);
+$('t-say').onclick = () => speak(T.queue[T.idx].en);
+$('t-hint-btn').onclick = () => show('t-hint', true);
+$('t-showans').onclick = showAnswer;
+$('t-ok').onclick = markOk;
+$('t-ng').onclick = markNg;
+$('t-fixed').onclick = next;
+$('t-retry-missed').onclick = () => { T.round++; startTest(T.missed); };
+$('t-again').onclick = () => { T.firstTry = 0; T.round = 1; startTest(weekByStart(T.week)[T.group]); };
+$('t-quit').onclick = $('t-home').onclick = () => {
+    stopAll();
+    show('t-play', false); show('t-done', false); show('t-setup', true);
+    renderSetup();
+};
+renderSetup();
+
+// ---- ことばの一覧（おうちの人と使う）: 今週を上に、ほかの週はたたんで下に置く ----
 const root = document.getElementById('weeks');
-weeks.forEach((week, i) => {
+sortedWeeks.forEach(week => {
     let box;
-    if (i === 0) {
-        box = root;
+    if (week === currentWeek) {
+        box = document.createElement('div');
         const h = document.createElement('h2');
         h.className = 'week-title';
-        h.textContent = week.label;
+        h.textContent = week.label + '（今週）';
         box.appendChild(h);
+        root.prepend(box);
     } else {
         box = document.createElement('details');
         box.className = 'week';
